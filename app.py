@@ -7,7 +7,7 @@ app.secret_key = 'secret-key'
 # Ruta principal
 @app.route('/')
 def home():
-    return '<h2>Bienvenido a la App CRUD Flask + MySQL</h2><a href="/usuarios">Ver usuarios</a>'
+    return '<h2> App CRUD Flask + MySQL</h2><a href="/usuarios">Ver usuarios</a>'
 
 # Ruta para mostrar la lista de usuarios
 @app.route('/usuarios')
@@ -35,7 +35,7 @@ def crear_usuario():
         try:
             conn = create_connection()
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO users (name, email) VALUES (%s, %s)", (nombre, email))
+            cursor.execute("INSERT INTO users (name, email) VALUES (?, ?)", (nombre, email))
             conn.commit()
             conn.close()
             flash('Usuario creado correctamente.')
@@ -50,7 +50,7 @@ def eliminar_usuario(id):
     try:
         conn = create_connection()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM users WHERE id = %s", (id,))
+        cursor.execute("DELETE FROM users WHERE id = ?", (id,))
         conn.commit()
         conn.close()
         flash('Usuario eliminado correctamente.')
@@ -72,15 +72,14 @@ def editar_usuario(id):
             if not nombre.strip() or not email.strip():
                 return "Nombre y correo no pueden estar vacíos."
 
-            cursor.execute("UPDATE users SET name=%s, email=%s WHERE id=%s", (nombre, email, id))
+            cursor.execute("UPDATE users SET name=?, email=? WHERE id=?", (nombre, email, id))
             conn.commit()
             conn.close()
-            flash('Usuario modificado correctamente.')
+            flash('Usuario actualizado correctamente.')
             return redirect(url_for('listar_usuarios'))
 
-
-        # GET → cargar datos actuales
-        cursor.execute("SELECT * FROM users WHERE id = %s", (id,))
+        # GET → mostrar datos
+        cursor.execute("SELECT * FROM users WHERE id = ?", (id,))
         usuario = cursor.fetchone()
         conn.close()
 

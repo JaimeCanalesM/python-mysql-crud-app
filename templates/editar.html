@@ -19,19 +19,19 @@
     {% endwith %}
 
     <form action="/editar/{{ usuario[0] }}" method="POST" class="bg-white p-4 rounded shadow-sm">
-        <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" name="nombre" class="form-control" value="{{ usuario[1] }}" required>
-        </div>
+    <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre</label>
+        <input type="text" name="nombre" class="form-control" value="{{ usuario[1] }}" required>
+    </div>
 
-        <div class="mb-3">
-            <label for="email" class="form-label">Correo electrónico</label>
-            <input type="email" name="email" class="form-control" value="{{ usuario[2] }}" required>
-        </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Correo electrónico</label>
+        <input type="email" name="email" class="form-control" value="{{ usuario[2] }}" required>
+    </div>
 
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        <a href="/usuarios" class="btn btn-secondary">Cancelar</a>
-    </form>
+    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    <a href="/usuarios" class="btn btn-secondary">Cancelar</a>
+</form>
 </div>
 
 </body>
