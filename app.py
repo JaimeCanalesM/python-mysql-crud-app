@@ -1,38 +1,4 @@
-from db import create_connection
-
-def create_user(name, email):
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO users (name, email) VALUES (%s, %s)", (name, email))
-    conn.commit()
-    conn.close()
-    print("Usuario agregado correctamente.")
-
-def read_users():
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users")
-    rows = cursor.fetchall()
-    conn.close()
-    print("\n Lista de usuarios:")
-    for row in rows:
-        print(f"ID: {row[0]} | Nombre: {row[1]} | Email: {row[2]}")
-
-def update_user(user_id, name, email):
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute("UPDATE users SET name=%s, email=%s WHERE id=%s", (name, email, user_id))
-    conn.commit()
-    conn.close()
-    print("Usuario actualizado.")
-
-def delete_user(user_id):
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM users WHERE id=%s", (user_id,))
-    conn.commit()
-    conn.close()
-    print("Usuario eliminado.")
+from controllers import create_user, read_users, update_user, delete_user
 
 def menu():
     while True:
