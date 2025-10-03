@@ -1,35 +1,97 @@
-from controllers import create_user, read_users, update_user, delete_user
+from flask import Flask, render_template, request, redirect, url_for, flash
+from db import create_connection
 
-def menu():
-    while True:
-        print("\n--- Menú CRUD ---")
-        print("1. Crear usuario")
-        print("2. Ver usuarios")
-        print("3. Actualizar usuario")
-        print("4. Eliminar usuario")
-        print("5. Salir")
+app = Flask(__name__)
+app.secret_key = 'secret-key'
 
-        choice = input("Selecciona una opción: ")
+# Ruta principal
+@app.route('/')
+def home():
+    return '<h2>Bienvenido a la App CRUD Flask + MySQL</h2><a href="/usuarios">Ver usuarios</a>'
 
-        if choice == "1":
-            name = input("Nombre: ")
-            email = input("Email: ")
-            create_user(name, email)
-        elif choice == "2":
-            read_users()
-        elif choice == "3":
-            user_id = input("ID del usuario a actualizar: ")
-            name = input("Nuevo nombre: ")
-            email = input("Nuevo email: ")
-            update_user(user_id, name, email)
-        elif choice == "4":
-            user_id = input("ID del usuario a eliminar: ")
-            delete_user(user_id)
-        elif choice == "5":
-            print("Saliendo del programa.")
-            break
+# Ruta para mostrar la lista de usuarios
+@app.route('/usuarios')
+def listar_usuarios():
+    try:
+        conn = create_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users")
+        usuarios = cursor.fetchall()
+        conn.close()
+        return render_template("usuarios.html", usuarios=usuarios)
+    except Exception as e:
+        return f"Error al obtener usuarios: {e}"
+
+# Ruta para crear un nuevo usuario
+@app.route('/crear', methods=['GET', 'POST'])
+def crear_usuario():
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        email = request.form['email']
+
+        if not nombre.strip() or not email.strip():
+            return "Nombre y correo no pueden estar vacíos."
+
+        try:
+            conn = create_connection()
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO users (name, email) VALUES (%s, %s)", (nombre, email))
+            conn.commit()
+            conn.close()
+            flash('Usuario creado correctamente.')
+            return redirect(url_for('listar_usuarios'))
+        except Exception as e:
+            return f"Error al crear usuario: {e}"
+
+    return render_template("crear.html")
+
+@app.route('/eliminar/<int:id>')
+def eliminar_usuario(id):
+    try:
+        conn = create_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM users WHERE id = %s", (id,))
+        conn.commit()
+        conn.close()
+        flash('Usuario eliminado correctamente.')
+        return redirect(url_for('listar_usuarios'))
+    except Exception as e:
+        return f"Error al eliminar usuario: {e}"
+
+
+@app.route('/editar/<int:id>', methods=['GET', 'POST'])
+def editar_usuario(id):
+    try:
+        conn = create_connection()
+        cursor = conn.cursor()
+
+        if request.method == 'POST':
+            nombre = request.form['nombre']
+            email = request.form['email']
+
+            if not nombre.strip() or not email.strip():
+                return "Nombre y correo no pueden estar vacíos."
+
+            cursor.execute("UPDATE users SET name=%s, email=%s WHERE id=%s", (nombre, email, id))
+            conn.commit()
+            conn.close()
+            flash('Usuario modificado correctamente.')
+            return redirect(url_for('listar_usuarios'))
+
+
+        # GET → cargar datos actuales
+        cursor.execute("SELECT * FROM users WHERE id = %s", (id,))
+        usuario = cursor.fetchone()
+        conn.close()
+
+        if usuario:
+            return render_template("editar.html", usuario=usuario)
         else:
-            print("Opción no válida.")
+            return "Usuario no encontrado."
 
-if __name__ == "__main__":
-    menu()
+    except Exception as e:
+        return f"Error al editar usuario: {e}"
+
+# Ejecutar la app
+if __name__ == '__main__':
+    app.run(debug=True)
